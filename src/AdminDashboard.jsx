@@ -24,6 +24,7 @@ const toolItems = [
   { id: 'createUser', label: 'Create User' },
   { id: 'addReview', label: 'Add Review Task' },
   { id: 'bulkUpload', label: 'Bulk CSV Upload' },
+  { id: 'userLogs', label: 'User Logs' },
 ]
 
 const reviewerColumns = [
@@ -59,6 +60,7 @@ function AdminDashboard() {
   const [reviewers, setReviewers] = useState([])
   const [summary, setSummary] = useState({ total: 0, pending: 0, approved: 0, rejected: 0, under_review: 0 })
   const [globalTasks, setGlobalTasks] = useState([])
+  const [userLogs, setUserLogs] = useState([])
   const [selectedReviewerId, setSelectedReviewerId] = useState(null)
   const [reviewerHistory, setReviewerHistory] = useState({ approved: [], rejected: [], pending: [], underReview: [] })
   const [selectedRecord, setSelectedRecord] = useState(null)
@@ -216,6 +218,21 @@ function AdminDashboard() {
       setScreen('addReview')
     } else if (itemId === 'bulkUpload') {
       setScreen('bulkUpload')
+    } else if (itemId === 'userLogs') {
+      setScreen('userLogs')
+      fetchUserLogs()
+    }
+  }
+
+  const fetchUserLogs = async () => {
+    setLoading(true)
+    try {
+      const response = await api.get('/admin/user-logs')
+      setUserLogs(response.data)
+    } catch (err) {
+      console.error('Failed to fetch user logs:', err)
+    } finally {
+      setLoading(false)
     }
   }
 
@@ -383,6 +400,10 @@ function AdminDashboard() {
 
           {screen === 'bulkUpload' ? (
             <BulkUploadView />
+          ) : null}
+
+          {screen === 'userLogs' ? (
+            <UserLogsView logs={userLogs} />
           ) : null}
         </section>
       </main>
@@ -1165,6 +1186,65 @@ function BulkUploadView() {
             </div>
           </div>
         )}
+      </section>
+    </div>
+  );
+}
+
+function UserLogsView({ logs }) {
+  const logColumns = [
+    { key: 'userName', label: 'User' },
+    { key: 'userEmail', label: 'Email' },
+    { 
+      key: 'loginAt', 
+      label: 'Login Time', 
+      render: (row) => row.loginAt ? new Date(row.loginAt).toLocaleString() : '---' 
+    },
+    { 
+      key: 'logoutAt', 
+      label: 'Logout Time', 
+      render: (row) => row.logoutAt ? new Date(row.logoutAt).toLocaleString() : (row.status === 'Active' ? <span style={{ color: '#1f8f6a', fontWeight: 'bold' }}>Active Now</span> : '---') 
+    },
+    {
+      key: 'duration',
+      label: 'Duration',
+      render: (row) => {
+        if (!row.loginAt || !row.logoutAt) return '---';
+        const diff = new Date(row.logoutAt) - new Date(row.loginAt);
+        const mins = Math.floor(diff / 60000);
+        const secs = Math.floor((diff % 60000) / 1000);
+        return `${mins}m ${secs}s`;
+      }
+    },
+    { key: 'ipAddress', label: 'IP Address' },
+    { 
+      key: 'status', 
+      label: 'Status', 
+      render: (row) => (
+        <span style={{ 
+          color: row.status === 'Active' ? '#1f8f6a' : (row.status === 'Completed' ? '#3b82f6' : '#64748b'),
+          fontWeight: '600',
+          textTransform: 'uppercase',
+          fontSize: '0.75rem'
+        }}>
+          {row.status}
+        </span>
+      )
+    },
+  ];
+
+  return (
+    <div className="admin-screen">
+      <div className="admin-copy-block">
+        <div className="admin-section-label">Monitoring:</div>
+        <div className="admin-section-title">User Sessions</div>
+      </div>
+
+      <section className="admin-table-card">
+        <DataTable
+          columns={logColumns}
+          rows={logs}
+        />
       </section>
     </div>
   );

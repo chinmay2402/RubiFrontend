@@ -1,5 +1,6 @@
 import { Icon } from './Icon'
 import { useNavigate } from 'react-router-dom'
+import api from '../api/api'
 
 export function AdminHeader({
   reviewer,
@@ -16,10 +17,18 @@ export function AdminHeader({
   const displayName = user ? user.name : reviewer ? reviewer.name : "Admin";
   const displayRole = user ? (user.role.charAt(0).toUpperCase() + user.role.slice(1)) : reviewer ? reviewer.role : "Admin";
 
-  const handleLogout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
-    navigate("/");
+  const handleLogout = async () => {
+    try {
+      if (user && user._id) {
+        await api.post("/auth/logout", { userId: user._id });
+      }
+    } catch (err) {
+      console.error("Logout log failed:", err);
+    } finally {
+      localStorage.removeItem("token");
+      localStorage.removeItem("user");
+      navigate("/");
+    }
   };
 
   return (

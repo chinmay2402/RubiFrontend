@@ -1,5 +1,6 @@
 import { Icon } from './Icon'
 import { useNavigate } from 'react-router-dom'
+import api from '../api/api'
 
 export function Navbar({ reviewer, searchValue, onSearchChange, onProfileClick, profileOpen = false }) {
   const navigate = useNavigate();
@@ -7,10 +8,18 @@ export function Navbar({ reviewer, searchValue, onSearchChange, onProfileClick, 
   const displayName = user ? user.name : reviewer ? reviewer.name : "User";
   const displayRole = user ? (user.role.charAt(0).toUpperCase() + user.role.slice(1)) : reviewer ? reviewer.role : "Guest";
 
-  const handleLogout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
-    navigate("/");
+  const handleLogout = async () => {
+    try {
+      if (user && user._id) {
+        await api.post("/auth/logout", { userId: user._id });
+      }
+    } catch (err) {
+      console.error("Logout log failed:", err);
+    } finally {
+      localStorage.removeItem("token");
+      localStorage.removeItem("user");
+      navigate("/");
+    }
   };
 
   return (
