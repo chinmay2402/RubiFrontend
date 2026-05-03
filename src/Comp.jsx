@@ -83,6 +83,24 @@ function Dashboard() {
       fetchTasks()
     })
 
+    socket.on('reviewUpdated', (data) => {
+      console.log('Review updated:', data)
+      // Refresh tasks when a review is updated (e.g., reassigned to this reviewer)
+      fetchTasks()
+    })
+
+    socket.on('reviewCreated', (data) => {
+      console.log('Review created:', data)
+      // Refresh tasks when new reviews are created (might be assigned to this reviewer)
+      fetchTasks()
+    })
+
+    socket.on('reviewsCreated', (data) => {
+      console.log('Reviews created:', data)
+      // Refresh tasks when multiple new reviews are created
+      fetchTasks()
+    })
+
     return () => {
       socket.disconnect()
     }

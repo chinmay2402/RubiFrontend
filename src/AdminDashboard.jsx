@@ -89,10 +89,53 @@ function AdminDashboard() {
       }
     })
 
+    // Listen for review-related events to update admin dashboard in real-time
+    socket.on('reviewLocked', (data) => {
+      console.log('Review locked:', data)
+      // Refresh stats and tasks when a review is locked
+      fetchStats()
+      if (viewMode === 'tasks' && activeQueue !== 'all_reviewers') {
+        fetchGlobalTasks(activeQueue)
+      }
+    })
+
+    socket.on('reviewUnlocked', (data) => {
+      console.log('Review unlocked:', data)
+      // Refresh stats and tasks when a review is unlocked
+      fetchStats()
+      if (viewMode === 'tasks' && activeQueue !== 'all_reviewers') {
+        fetchGlobalTasks(activeQueue)
+      }
+    })
+
+    socket.on('reviewUpdated', (data) => {
+      console.log('Review updated:', data)
+      // Refresh stats and reviewer details when a review status changes
+      fetchStats()
+      if (selectedReviewerId) {
+        fetchReviewerDetails(selectedReviewerId)
+      }
+      if (viewMode === 'tasks' && activeQueue !== 'all_reviewers') {
+        fetchGlobalTasks(activeQueue)
+      }
+    })
+
+    socket.on('reviewCreated', (data) => {
+      console.log('Review created:', data)
+      // Refresh stats when a new review is created
+      fetchStats()
+    })
+
+    socket.on('reviewsCreated', (data) => {
+      console.log('Reviews created:', data)
+      // Refresh stats when multiple reviews are created
+      fetchStats()
+    })
+
     return () => {
       socket.disconnect()
     }
-  }, [screen]) // Depend on screen to re-run when screen changes
+  }, [screen, viewMode, activeQueue, selectedReviewerId]) // Depend on relevant state variables
 
   const fetchStats = async () => {
     setLoading(true)
