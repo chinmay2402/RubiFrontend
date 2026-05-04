@@ -642,7 +642,7 @@ function AdminDetail({ reviewer, record, logs, onModify, onReassign, reviewers, 
   if (!record) return <div>No record selected</div>;
 
   return (
-    <div className="admin-detail-layout" style={{maxHeight: 100}}>
+    <div className="admin-detail-layout">
       <aside className="admin-detail-rail">
         {/* <button className="admin-detail-chip" type="button">
           Content Details
@@ -757,13 +757,23 @@ function AdminDetail({ reviewer, record, logs, onModify, onReassign, reviewers, 
                 >
                   Send Back
                 </Button>
-                <Button 
-                  variant="primary" 
-                  icon="edit"
-                  onClick={() => onModify(record._id, 'approved', 'Re-verified by admin')}
-                >
-                  Force Approve
-                </Button>
+                {record.status?.state === 'approved' ? (
+                  <Button 
+                    variant="primary" 
+                    icon="edit"
+                    onClick={() => onModify(record._id, 'rejected', 'Admin forced reject')}
+                  >
+                    Force Reject
+                  </Button>
+                ) : (
+                  <Button 
+                    variant="primary" 
+                    icon="edit"
+                    onClick={() => onModify(record._id, 'approved', 'Re-verified by admin')}
+                  >
+                    Force Approve
+                  </Button>
+                )}
               </>
             ) : (
                <div style={{ background: '#f1f5f9', padding: '12px', borderRadius: '8px', border: '1px solid #e2e8f0', width: '100%' }}>
