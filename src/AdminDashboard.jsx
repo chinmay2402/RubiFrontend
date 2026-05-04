@@ -79,7 +79,7 @@ function AdminDashboard() {
 
   // Socket.IO connection for real-time updates
   useEffect(() => {
-    const socket = io('http://localhost:5000') // Backend URL
+    const socket = io('https://rubiscape-backend.onrender.com') // Backend URL
 
     socket.on('userActivity', (data) => {
       console.log('User activity:', data)

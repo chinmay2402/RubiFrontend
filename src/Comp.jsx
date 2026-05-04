@@ -69,7 +69,7 @@ function Dashboard() {
 
   // Socket.IO connection for real-time task updates
   useEffect(() => {
-    const socket = io('http://localhost:5000') // Backend URL
+    const socket = io('https://rubiscape-backend.onrender.com') // Backend URL
 
     socket.on('reviewLocked', (data) => {
       console.log('Review locked by another reviewer:', data)
