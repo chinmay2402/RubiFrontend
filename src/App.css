@@ -13,7 +13,7 @@ body {
   min-height: 100vh;
   display: grid;
   grid-template-columns: 260px minmax(0, 1fr);
-  width: 100vw;
+  width: 100%;
 }
 
 .sidebar {
@@ -902,10 +902,11 @@ body {
 }
 
 .admin-shell {
-  max-height: 100vh;
+  height: 100vh;
   display: grid;
   grid-template-columns: 230px minmax(0, 1fr);
   background: #f7f7f5;
+  overflow: hidden;
 }
 
 .admin-sidebar {
@@ -914,7 +915,8 @@ body {
   padding: 20px 12px 18px;
   border-right: 1px solid rgba(205, 213, 223, 0.75);
   background: rgba(255, 255, 255, 0.92);
-  max-height: 100vh
+  height: 100vh;
+  overflow-y: auto;
 }
 
 .admin-sidebar__brand {
@@ -959,6 +961,8 @@ body {
   min-width: 0;
   display: flex;
   flex-direction: column;
+  height: 100vh;
+  overflow-y: auto;
 }
 
 .admin-topbar {
@@ -1026,10 +1030,13 @@ body {
 
 .admin-content {
   padding: 0 20px 20px 0;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
 }
 
 .admin-screen {
-  min-height: calc(100vh - 74px);
+  flex: 1;
   padding: 18px 14px 20px;
 }
 
@@ -1122,7 +1129,7 @@ body {
 .admin-detail-layout {
   display: grid;
   grid-template-columns: 190px minmax(0, 1fr);
-  min-height: calc(100vh - 74px);
+  flex: 1;
   margin-left: 14px;
   background: #fff;
   border: 1px solid rgba(220, 227, 234, 0.95);
@@ -1261,6 +1268,7 @@ body {
 }
 
 @media (max-width: 1180px) {
+
   .page-grid,
   .audit-layout,
   .settings-grid,
@@ -1517,10 +1525,25 @@ body {
   margin: 4px 0;
 }
 
-.marker--approved { background: #22c55e; box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.1); }
-.marker--rejected { background: #ef4444; box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.1); }
-.marker--locked { background: #3b82f6; box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1); }
-.marker--unlocked { background: #64748b; box-shadow: 0 0 0 4px rgba(100, 116, 139, 0.1); }
+.marker--approved {
+  background: #22c55e;
+  box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.1);
+}
+
+.marker--rejected {
+  background: #ef4444;
+  box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.1);
+}
+
+.marker--locked {
+  background: #3b82f6;
+  box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+}
+
+.marker--unlocked {
+  background: #64748b;
+  box-shadow: 0 0 0 4px rgba(100, 116, 139, 0.1);
+}
 
 .timeline-content {
   flex: 1;
@@ -1552,8 +1575,15 @@ body {
   margin-bottom: 10px;
 }
 
-.timeline-user { font-weight: 600; color: #475569; }
-.timeline-role { color: #94a3b8; margin-left: 6px; }
+.timeline-user {
+  font-weight: 600;
+  color: #475569;
+}
+
+.timeline-role {
+  color: #94a3b8;
+  margin-left: 6px;
+}
 
 .timeline-message {
   font-size: 0.9rem;
@@ -1575,13 +1605,27 @@ body {
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 @keyframes scaleIn {
-  from { opacity: 0; transform: scale(0.95); }
-  to { opacity: 1; transform: scale(1); }
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 
 /* GENERIC BUTTONS FOR MODALS (If not using Button comp) */
@@ -1596,7 +1640,10 @@ body {
   transition: filter 0.2s;
 }
 
-.btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+.btn-primary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
 
 .btn-ghost {
   padding: 12px 24px;
@@ -1789,8 +1836,15 @@ body {
 
 /* Scale-in animation for profile card */
 @keyframes scaleIn {
-  from { opacity: 0; transform: scale(0.92) translateY(-6px); }
-  to   { opacity: 1; transform: scale(1)   translateY(0); }
+  from {
+    opacity: 0;
+    transform: scale(0.92) translateY(-6px);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
 }
 
 .animate-scale-in {

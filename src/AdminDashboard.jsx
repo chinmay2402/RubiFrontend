@@ -8,6 +8,8 @@ import { DataTable } from './components/DataTable'
 import { InfoPair } from './components/InfoPair'
 import { StatusPill } from './components/StatusPill'
 import io from 'socket.io-client'
+import * as XLSX from 'xlsx'
+
 
 const queueItems = [
   { id: 'all_reviewers', label: 'All Reviewers', accent: 'slate' },
@@ -1086,26 +1088,63 @@ function BulkUploadView() {
   const handleFileChange = (e) => {
     const selectedFile = e.target.files[0];
     if (!selectedFile) return;
-    if (!selectedFile.name.endsWith('.csv')) {
-      setError("Please select a valid .csv file.");
+
+    const isExcel = selectedFile.name.endsWith('.xlsx') || selectedFile.name.endsWith('.xls');
+    const isCsv = selectedFile.name.endsWith('.csv');
+
+    if (!isExcel && !isCsv) {
+      setError("Please select a valid .csv or .xlsx/.xls file.");
       return;
     }
+
     setFile(selectedFile);
     setError("");
     setSuccess("");
 
     const reader = new FileReader();
-    reader.onload = (event) => {
-      const text = event.target.result;
-      const rows = parseCSV(text);
-      if (rows.length === 0) {
-        setError("CSV file is empty or invalid.");
-        setPreview([]);
-      } else {
-        setPreview(rows);
-      }
-    };
-    reader.readAsText(selectedFile);
+
+    if (isCsv) {
+      reader.onload = (event) => {
+        const text = event.target.result;
+        const rows = parseCSV(text);
+        if (rows.length === 0) {
+          setError("CSV file is empty or invalid.");
+          setPreview([]);
+        } else {
+          setPreview(rows);
+        }
+      };
+      reader.readAsText(selectedFile);
+    } else {
+      reader.onload = (event) => {
+        try {
+          const data = new Uint8Array(event.target.result);
+          const workbook = XLSX.read(data, { type: 'array' });
+          const sheetName = workbook.SheetNames[0];
+          const worksheet = workbook.Sheets[sheetName];
+          const jsonData = XLSX.utils.sheet_to_json(worksheet);
+
+          const validRows = jsonData
+            .filter(row => row.aiPrompt && row.aiOutput)
+            .map(row => ({ 
+              aiPrompt: String(row.aiPrompt), 
+              aiOutput: String(row.aiOutput) 
+            }));
+
+          if (validRows.length === 0) {
+            setError("Excel file has no valid rows with 'aiPrompt' and 'aiOutput' columns.");
+            setPreview([]);
+          } else {
+            setPreview(validRows);
+          }
+        } catch (err) {
+          console.error("Excel parse error:", err);
+          setError("Failed to parse Excel file.");
+          setPreview([]);
+        }
+      };
+      reader.readAsArrayBuffer(selectedFile);
+    }
   };
 
   const parseCSV = (text) => {
@@ -1183,7 +1222,7 @@ function BulkUploadView() {
         {success && <div className="mb-4 text-green-600 text-sm p-3 bg-green-50 rounded-lg">{success}</div>}
 
         <div style={{ marginBottom: '24px' }}>
-          <label className="info-pair__label">Select CSV File</label>
+          <label className="info-pair__label">Select Data File</label>
           <div style={{ 
             marginTop: '8px', 
             padding: '24px', 
@@ -1194,16 +1233,19 @@ function BulkUploadView() {
           }}>
             <input 
               type="file" 
-              accept=".csv" 
+              accept=".csv, .xlsx, .xls" 
               onChange={handleFileChange} 
               id="csv-upload" 
               style={{ display: 'none' }}
             />
             <label htmlFor="csv-upload" style={{ cursor: 'pointer' }}>
-              <div style={{ fontSize: '2rem', marginBottom: '8px' }}>📄</div>
-              <div style={{ fontWeight: '600', color: '#1f2937' }}>{file ? file.name : "Click to select CSV"}</div>
+              <div style={{ fontSize: '2rem', marginBottom: '8px' }}>📊</div>
+              <div style={{ fontWeight: '600', color: '#1f2937' }}>{file ? file.name : "Click to select CSV or Excel"}</div>
               <div style={{ fontSize: '0.85rem', color: '#64748b', marginTop: '4px' }}>
-                Required headers: <code>aiPrompt</code>, <code>aiOutput</code>
+                Supported formats: <strong>.csv, .xlsx, .xls</strong>
+              </div>
+              <div style={{ fontSize: '0.85rem', color: '#64748b', marginTop: '4px' }}>
+                Required columns: <code>aiPrompt</code>, <code>aiOutput</code>
               </div>
             </label>
           </div>
