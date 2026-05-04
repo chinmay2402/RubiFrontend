@@ -98,6 +98,24 @@ function AdminDashboard() {
       if (viewMode === 'tasks' && activeQueue !== 'all_reviewers') {
         fetchGlobalTasks(activeQueue)
       }
+      
+      // If the admin is currently viewing this task, send them back to the list
+      setSelectedRecord((prev) => {
+        if (prev && prev._id === data.reviewId) {
+          alert('This task was just locked by a reviewer. Returning to task list.')
+          
+          // Defer the queue transition slightly to avoid React state-update-during-render warnings
+          setTimeout(() => {
+            setActiveQueue('all');
+            setViewMode('tasks');
+            setScreen('tasks');
+            fetchGlobalTasks('all');
+          }, 0);
+          
+          return null
+        }
+        return prev
+      })
     })
 
     socket.on('reviewUnlocked', (data) => {
